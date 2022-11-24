@@ -25,6 +25,6 @@ public class SectionLayer_BridgeProps_Heavy : SectionLayer_BridgeProps
 
     protected override bool IsTerrainThisBridge(TerrainDef terrain)
     {
-        return terrain.designatorDropdown == DesignatorDropdownGroupDefOf.Bridge_Heavy;
+        return terrain.defName.StartsWith(BridgeType.Heavy.DefName());
     }
 }

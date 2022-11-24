@@ -14,7 +14,7 @@ public static class Harmony_TerrainGrid_RemoveTopLayer
             Log.Message($"terrainDef: {terrainDef}");
         }
 
-        if (!terrainDef.defName.StartsWith("DeepWaterBridge"))
+        if (!terrainDef.defName.StartsWith(BridgeType.Deep.DefName()))
         {
             return true;
         }

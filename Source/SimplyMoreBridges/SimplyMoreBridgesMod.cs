@@ -33,9 +33,16 @@ internal class SimplyMoreBridgesMod : Mod
         var original = typeof(DefGenerator).GetMethod("GenerateImpliedDefs_PreResolve");
         var prefix = typeof(GenerateBridges).GetMethod("Prefix");
         new Harmony("mlie.simplymorebridges").Patch(original, new HarmonyMethod(prefix));
-        currentVersion =
-            VersionFromManifest.GetVersionFromModMetaData(
-                ModLister.GetActiveModWithIdentifier("Mlie.SimplyMoreBridges"));
+        try
+        {
+            currentVersion =
+                VersionFromManifest.GetVersionFromModMetaData(
+                    ModLister.GetActiveModWithIdentifier("Eternal.SimplyMoreBridges"));
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[Simply More Bridges (Improved)] {e}");
+        }
     }
 
     /// <summary>

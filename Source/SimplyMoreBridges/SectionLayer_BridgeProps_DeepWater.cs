@@ -25,6 +25,6 @@ public class SectionLayer_BridgeProps_DeepWater : SectionLayer_BridgeProps
 
     protected override bool IsTerrainThisBridge(TerrainDef terrain)
     {
-        return terrain.designatorDropdown == DesignatorDropdownGroupDefOf.Bridge_DeepWater;
+        return terrain.defName.StartsWith(BridgeType.Deep.DefName());
     }
 }
