@@ -9,6 +9,7 @@ namespace SimplyMoreBridges;
 public class GenerateBridges
 {
     public static readonly Dictionary<string, DesignatorDropdownGroupDef> DropDownDict = new();
+
     public static void Prefix()
     {
         try
@@ -17,7 +18,7 @@ public class GenerateBridges
                 .Concat(TerrainDefGenerator_Carpet.ImpliedTerrainDefs())
                 .Where(Include)
                 .ToList();
-            
+
             foreach (var td in terrainDefs)
             {
                 if (IsWooden(td))
@@ -32,14 +33,12 @@ public class GenerateBridges
             var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
             foreach (var styleCategoryDef in styleCategoryDefs)
             {
-                foreach (var (key, value) in DropDownDict)
+                if (styleCategoryDef.addDesignatorGroups == null) continue;
+                foreach (var groupDef in styleCategoryDef.addDesignatorGroups.ToList())
                 {
-                    if (styleCategoryDef.addDesignatorGroups != null && 
-                        styleCategoryDef.addDesignatorGroups.Any(dg => key.EndsWith(dg.defName)))
-                    {
-                        styleCategoryDef.addDesignatorGroups.Add(value);    
-                    }
-                       
+                    AddGroupToStyleIfExists(BridgeType.Wooden, groupDef, styleCategoryDef);
+                    AddGroupToStyleIfExists(BridgeType.Heavy, groupDef, styleCategoryDef);
+                    AddGroupToStyleIfExists(BridgeType.Deep, groupDef, styleCategoryDef);
                 }
             }
         }
@@ -48,6 +47,16 @@ public class GenerateBridges
             Log.Error("[Simply More More Bridges] Failed Generating");
             Log.Error(e.ToString());
             Log.Error(e.InnerException?.ToString());
+        }
+    }
+
+    private static void AddGroupToStyleIfExists(BridgeType bridgeType, DesignatorDropdownGroupDef groupDef,
+        StyleCategoryDef styleCategoryDef)
+    {
+        var groupDefDefName = bridgeType.DefName() + groupDef.defName;
+        if (DropDownDict.ContainsKey(groupDefDefName))
+        {
+            styleCategoryDef.addDesignatorGroups.Add(DropDownDict[groupDefDefName]);
         }
     }
 
@@ -69,7 +78,7 @@ public class GenerateBridges
     private static bool IsWooden(TerrainDef td)
     {
         return td.costList is {Count: > 0} &&
-               td.costList[0].thingDef is {stuffProps.categories: { }} && 
+               td.costList[0].thingDef is {stuffProps.categories: { }} &&
                td.costList[0].thingDef.stuffProps.categories.Contains(StuffCategoryDefOf.Woody);
     }
 
@@ -86,7 +95,7 @@ public class GenerateBridges
         }
         catch (Exception e)
         {
-            throw new Exception($"[Simply More More Bridges] {td.defName} ({bridgeType.DefName()})",e);
+            throw new Exception($"[Simply More More Bridges] {td.defName} ({bridgeType.DefName()})", e);
         }
     }
 
@@ -117,10 +126,9 @@ public class GenerateBridges
         }
 
         bridgeDef.texturePath = baseDef.texturePath;
-        
+
         var hitPoints = baseDef.GetStatValueAbstract(StatDefOf.MaxHitPoints) + 50f;
         bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.MaxHitPoints, value = hitPoints});
-        
         bridgeDef.tags = baseDef.tags?.ToList();
         return bridgeDef;
     }
@@ -328,7 +336,7 @@ public class GenerateBridges
         var bridgeDropdown = DropDownDict[bridgeDropdownDefName];
         bridgeDef.designatorDropdown = bridgeDropdown;
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
