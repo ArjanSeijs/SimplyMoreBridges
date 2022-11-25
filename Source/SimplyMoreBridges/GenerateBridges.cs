@@ -8,6 +8,7 @@ namespace SimplyMoreBridges;
 
 public class GenerateBridges
 {
+    public static readonly Dictionary<string, DesignatorDropdownGroupDef> DropDownDict = new();
     public static void Prefix()
     {
         try
@@ -16,23 +17,22 @@ public class GenerateBridges
                 .Concat(TerrainDefGenerator_Carpet.ImpliedTerrainDefs())
                 .Where(Include)
                 .ToList();
-
-            var dropdownDict = new Dictionary<string, DesignatorDropdownGroupDef>();
+            
             foreach (var td in terrainDefs)
             {
                 if (IsWooden(td))
                 {
-                    AddDef(td, BridgeType.Wooden, dropdownDict);
+                    AddDef(td, BridgeType.Wooden);
                 }
 
-                AddDef(td, BridgeType.Heavy, dropdownDict);
-                AddDef(td, BridgeType.Deep, dropdownDict);
+                AddDef(td, BridgeType.Heavy);
+                AddDef(td, BridgeType.Deep);
             }
-            
-            var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefs.ToList();
+
+            var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
             foreach (var styleCategoryDef in styleCategoryDefs)
             {
-                foreach (var (key, value) in dropdownDict)
+                foreach (var (key, value) in DropDownDict)
                 {
                     if (styleCategoryDef.addDesignatorGroups != null && 
                         styleCategoryDef.addDesignatorGroups.Any(dg => key.EndsWith(dg.defName)))
@@ -47,14 +47,25 @@ public class GenerateBridges
         {
             Log.Error("[Simply More More Bridges] Failed Generating");
             Log.Error(e.ToString());
+            Log.Error(e.InnerException?.ToString());
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="td"></param>
+    /// <returns></returns>
     private static bool Include(TerrainDef td)
     {
         return td.IsFloor && !td.bridge && td.BuildableByPlayer;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="td"></param>
+    /// <returns></returns>
     private static bool IsWooden(TerrainDef td)
     {
         return td.costList is {Count: > 0} &&
@@ -67,32 +78,31 @@ public class GenerateBridges
     /// </summary>
     /// <param name="td"></param>
     /// <param name="bridgeType"></param>
-    /// <param name="dropdownDict"></param>
-    private static void AddDef(TerrainDef td, BridgeType bridgeType,
-        Dictionary<string, DesignatorDropdownGroupDef> dropdownDict)
+    private static void AddDef(TerrainDef td, BridgeType bridgeType)
     {
         try
         {
-            DefGenerator.AddImpliedDef(GenerateBridgeDef(td, bridgeType, dropdownDict));
+            DefGenerator.AddImpliedDef(GenerateBridgeDef(td, bridgeType));
         }
         catch (Exception e)
         {
-            Log.Error($"[Simply More More Bridges] {td.defName} ({bridgeType.DefName()})");
-            Log.Error(e.Message);
-            Log.Error(e.ToString());
-            Log.Error(e.StackTrace);
-            throw;
+            throw new Exception($"[Simply More More Bridges] {td.defName} ({bridgeType.DefName()})",e);
         }
     }
 
-    private static TerrainDef GenerateBridgeDef(TerrainDef baseDef, BridgeType bridgeType,
-        Dictionary<string, DesignatorDropdownGroupDef> dropdownDict)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="baseDef"></param>
+    /// <param name="bridgeType"></param>
+    /// <returns></returns>
+    private static TerrainDef GenerateBridgeDef(TerrainDef baseDef, BridgeType bridgeType)
     {
         var bridgeDef = GetNewBridge(baseDef, bridgeType);
 
         CopyFields(baseDef, bridgeDef);
-        SetTerrainAffordance(bridgeType, baseDef, bridgeDef);
-        SetDropdownDef(baseDef, bridgeDef, bridgeType, dropdownDict);
+        SetTerrainAffordance(baseDef, bridgeDef, bridgeType);
+        SetDropdownDef(baseDef, bridgeDef, bridgeType);
         SetCosts(baseDef, bridgeDef, bridgeType);
 
         if (baseDef.researchPrerequisites != null)
@@ -140,10 +150,10 @@ public class GenerateBridges
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="bridgeType"></param>
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
-    private static void SetTerrainAffordance(BridgeType bridgeType, TerrainDef baseDef, TerrainDef bridgeDef)
+    /// <param name="bridgeType"></param>
+    private static void SetTerrainAffordance(TerrainDef baseDef, TerrainDef bridgeDef, BridgeType bridgeType)
     {
         var statValue = baseDef.GetStatValueAbstract(StatDefOf.WorkToBuild);
         switch (bridgeType)
@@ -295,15 +305,13 @@ public class GenerateBridges
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
     /// <param name="bridgeType"></param>
-    /// <param name="dropdownDict"></param>
-    private static void SetDropdownDef(TerrainDef baseDef, TerrainDef bridgeDef, BridgeType bridgeType,
-        Dictionary<string, DesignatorDropdownGroupDef> dropdownDict)
+    private static void SetDropdownDef(TerrainDef baseDef, TerrainDef bridgeDef, BridgeType bridgeType)
     {
         if (baseDef.designatorDropdown == null) return;
         var baseDropdown = baseDef.designatorDropdown;
         var bridgeDropdownDefName = bridgeType.DefName() + baseDropdown.defName;
 
-        if (!dropdownDict.ContainsKey(bridgeDropdownDefName))
+        if (!DropDownDict.ContainsKey(bridgeDropdownDefName))
         {
             var newBridgeDropdown = new DesignatorDropdownGroupDef
             {
@@ -314,13 +322,18 @@ public class GenerateBridges
                 includeEyeDropperTool = baseDropdown.includeEyeDropperTool,
                 description = baseDropdown.description + $" ({bridgeType.Label()})"
             };
-            dropdownDict.Add(bridgeDropdownDefName, newBridgeDropdown);
+            DropDownDict.Add(bridgeDropdownDefName, newBridgeDropdown);
         }
 
-        var bridgeDropdown = dropdownDict[bridgeDropdownDefName];
+        var bridgeDropdown = DropDownDict[bridgeDropdownDefName];
         bridgeDef.designatorDropdown = bridgeDropdown;
     }
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="originalCost"></param>
+    /// <returns></returns>
     private static int GetCustomCost(int originalCost)
     {
         var recountedCost = originalCost * LoadedModManager.GetMod<SimplyMoreBridgesMod>()
