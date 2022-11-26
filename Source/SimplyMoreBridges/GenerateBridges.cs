@@ -41,21 +41,9 @@ public class GenerateBridges
         }
     }
 
-    private static void AddIdeologyDesignatorGroups()
-    {
-        var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
-        foreach (var styleCategoryDef in styleCategoryDefs)
-        {
-            if (styleCategoryDef.addDesignatorGroups == null) continue;
-            foreach (var groupDef in styleCategoryDef.addDesignatorGroups.ToList())
-            {
-                AddGroupToStyleIfExists(BridgeType.Wooden, groupDef, styleCategoryDef);
-                AddGroupToStyleIfExists(BridgeType.Heavy, groupDef, styleCategoryDef);
-                AddGroupToStyleIfExists(BridgeType.Deep, groupDef, styleCategoryDef);
-            }
-        }
-    }
-
+    /// <summary>
+    /// Get all terrains that should be turned into bridges.
+    /// </summary>
     private static void AddBridgeDefs()
     {
         var terrainDefs = DefDatabase<TerrainDef>.AllDefs
@@ -75,6 +63,30 @@ public class GenerateBridges
         }
     }
 
+    /// <summary>
+    /// Adds designator groups to StyleCategoryDefs of generated StyleCategory Bridges
+    /// </summary>
+    private static void AddIdeologyDesignatorGroups()
+    {
+        var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
+        foreach (var styleCategoryDef in styleCategoryDefs)
+        {
+            if (styleCategoryDef.addDesignatorGroups == null) continue;
+            foreach (var groupDef in styleCategoryDef.addDesignatorGroups.ToList())
+            {
+                AddGroupToStyleIfExists(BridgeType.Wooden, groupDef, styleCategoryDef);
+                AddGroupToStyleIfExists(BridgeType.Heavy, groupDef, styleCategoryDef);
+                AddGroupToStyleIfExists(BridgeType.Deep, groupDef, styleCategoryDef);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds designator group to StyleCategoryDef of generated StyleCategory Bridges
+    /// </summary>
+    /// <param name="bridgeType"></param>
+    /// <param name="groupDef"></param>
+    /// <param name="styleCategoryDef"></param>
     private static void AddGroupToStyleIfExists(BridgeType bridgeType, DesignatorDropdownGroupDef groupDef,
         StyleCategoryDef styleCategoryDef)
     {
@@ -86,7 +98,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Whether this terrainDef should be turned into a bridge.
     /// </summary>
     /// <param name="td"></param>
     /// <returns></returns>
@@ -96,7 +108,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Wheter this terrainDef should create a woorden bridge.
     /// </summary>
     /// <param name="td"></param>
     /// <returns></returns>
@@ -108,11 +120,11 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Generates a bridge of type bridgeType of this terrainDef and adds it to Def Database
     /// </summary>
     /// <param name="td"></param>
     /// <param name="bridgeType"></param>
-    private static void AddDef(TerrainDef td, BridgeType bridgeType)
+    public static void AddDef(TerrainDef td, BridgeType bridgeType)
     {
         try
         {
@@ -125,7 +137,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Generates a bridge of type bridgeType of this terrainDef
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeType"></param>
@@ -135,7 +147,7 @@ public class GenerateBridges
         var bridgeDef = GetNewBridge(baseDef, bridgeType);
 
         CopyFields(baseDef, bridgeDef);
-        SetTerrainAffordance(baseDef, bridgeDef, bridgeType);
+        SetBridgeStats(baseDef, bridgeDef, bridgeType);
         SetDropdownDef(baseDef, bridgeDef, bridgeType);
         SetCosts(baseDef, bridgeDef, bridgeType);
 
@@ -159,7 +171,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Create a costlist based on the baseDef for this bridgeType adjusted for the custom cost setting.
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
@@ -181,12 +193,12 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Set stats based on bridgeType
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
     /// <param name="bridgeType"></param>
-    private static void SetTerrainAffordance(TerrainDef baseDef, TerrainDef bridgeDef, BridgeType bridgeType)
+    private static void SetBridgeStats(TerrainDef baseDef, TerrainDef bridgeDef, BridgeType bridgeType)
     {
         var statValue = baseDef.GetStatValueAbstract(StatDefOf.WorkToBuild);
         switch (bridgeType)
@@ -221,7 +233,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Base properties for the new Bridge.
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeType"></param>
@@ -264,7 +276,7 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Copies fields from the baseDef to the bridgeDef
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
@@ -333,7 +345,8 @@ public class GenerateBridges
     }
 
     /// <summary>
-    /// 
+    /// Create a dropdown menu if it does not exist for the bridge.
+    /// Or get an already existing dropdown menu.
     /// </summary>
     /// <param name="baseDef"></param>
     /// <param name="bridgeDef"></param>
