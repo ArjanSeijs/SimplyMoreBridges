@@ -32,7 +32,7 @@ internal class SimplyMoreBridgesMod : Mod
         instance = this;
         var original = typeof(DefGenerator).GetMethod("GenerateImpliedDefs_PreResolve");
         var prefix = typeof(GenerateBridges).GetMethod("Prefix");
-        new Harmony("mlie.simplymorebridges").Patch(original, new HarmonyMethod(prefix));
+        new Harmony("Eternal.simplymorebridges").Patch(original, new HarmonyMethod(prefix));
         try
         {
             currentVersion =
@@ -74,6 +74,10 @@ internal class SimplyMoreBridgesMod : Mod
         listing_Standard.Begin(rect);
         listing_Standard.Label("SimplyMoreBridges.RestartInfo".Translate());
         listing_Standard.Gap();
+        listing_Standard.CheckboxLabeled(
+            "SimplyMoreBridges.BackwardsCompatabilityLabel".Translate(),
+            ref Settings.BackwardsCompatibility,
+            "SimplyMoreBridges.BackwardsCompatabilityTooltip".Translate());
         listing_Standard.CheckboxLabeled(
             "SimplyMoreBridges.AddVisualsLabel".Translate(),
             ref Settings.AddVisuals,

@@ -14,39 +14,64 @@ public class GenerateBridges
     {
         try
         {
-            var terrainDefs = DefDatabase<TerrainDef>.AllDefs
-                .Concat(TerrainDefGenerator_Carpet.ImpliedTerrainDefs())
-                .Where(Include)
-                .ToList();
+            AddBridgeDefs();
+            AddIdeologyDesignatorGroups();
+        }
+        catch (Exception e)
+        {
+            Log.Error("[Simply More Bridges Improved] Failed Generating");
+            Log.Error(e.ToString());
+            Log.Error(e.InnerException?.ToString());
+        }
 
-            foreach (var td in terrainDefs)
+        try
+        {
+            if (LoadedModManager
+                .GetMod<SimplyMoreBridgesMod>()
+                .GetSettings<SimplyMoreBridgesSettings>().BackwardsCompatibility)
             {
-                if (IsWooden(td))
-                {
-                    AddDef(td, BridgeType.Wooden);
-                }
-
-                AddDef(td, BridgeType.Heavy);
-                AddDef(td, BridgeType.Deep);
-            }
-
-            var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
-            foreach (var styleCategoryDef in styleCategoryDefs)
-            {
-                if (styleCategoryDef.addDesignatorGroups == null) continue;
-                foreach (var groupDef in styleCategoryDef.addDesignatorGroups.ToList())
-                {
-                    AddGroupToStyleIfExists(BridgeType.Wooden, groupDef, styleCategoryDef);
-                    AddGroupToStyleIfExists(BridgeType.Heavy, groupDef, styleCategoryDef);
-                    AddGroupToStyleIfExists(BridgeType.Deep, groupDef, styleCategoryDef);
-                }
+                GenerateBridgesBackCompat.Prefix();
             }
         }
         catch (Exception e)
         {
-            Log.Error("[Simply More More Bridges] Failed Generating");
+            Log.Error("[Simply More Bridges Improved] Backwards Compat Failed Somehow");
             Log.Error(e.ToString());
             Log.Error(e.InnerException?.ToString());
+        }
+    }
+
+    private static void AddIdeologyDesignatorGroups()
+    {
+        var styleCategoryDefs = DefDatabase<StyleCategoryDef>.AllDefsListForReading;
+        foreach (var styleCategoryDef in styleCategoryDefs)
+        {
+            if (styleCategoryDef.addDesignatorGroups == null) continue;
+            foreach (var groupDef in styleCategoryDef.addDesignatorGroups.ToList())
+            {
+                AddGroupToStyleIfExists(BridgeType.Wooden, groupDef, styleCategoryDef);
+                AddGroupToStyleIfExists(BridgeType.Heavy, groupDef, styleCategoryDef);
+                AddGroupToStyleIfExists(BridgeType.Deep, groupDef, styleCategoryDef);
+            }
+        }
+    }
+
+    private static void AddBridgeDefs()
+    {
+        var terrainDefs = DefDatabase<TerrainDef>.AllDefs
+            .Concat(TerrainDefGenerator_Carpet.ImpliedTerrainDefs())
+            .Where(Include)
+            .ToList();
+
+        foreach (var td in terrainDefs)
+        {
+            if (IsWooden(td))
+            {
+                AddDef(td, BridgeType.Wooden);
+            }
+
+            AddDef(td, BridgeType.Heavy);
+            AddDef(td, BridgeType.Deep);
         }
     }
 
@@ -95,7 +120,7 @@ public class GenerateBridges
         }
         catch (Exception e)
         {
-            throw new Exception($"[Simply More More Bridges] {td.defName} ({bridgeType.DefName()})", e);
+            throw new Exception($"[Simply More Bridges Improved] {td.defName} ({bridgeType.DefName()})", e);
         }
     }
 
@@ -203,8 +228,8 @@ public class GenerateBridges
     /// <returns></returns>
     private static TerrainDef GetNewBridge(TerrainDef baseDef, BridgeType bridgeType)
     {
-        string defName = bridgeType.DefName() + baseDef.defName;
-        string label = bridgeType.Label() + baseDef.label;
+        var defName = bridgeType.DefName() + baseDef.defName;
+        var label = bridgeType.Label() + baseDef.label;
 
         var bridgeDef = new TerrainDef
         {

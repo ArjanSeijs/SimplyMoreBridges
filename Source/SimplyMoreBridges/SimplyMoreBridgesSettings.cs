@@ -7,6 +7,8 @@ namespace SimplyMoreBridges;
 /// </summary>
 internal class SimplyMoreBridgesSettings : ModSettings
 {
+    public bool BackwardsCompatibility;
+    
     public bool AddVisuals;
 
     public float CostPercent = 1f;
@@ -21,6 +23,7 @@ internal class SimplyMoreBridgesSettings : ModSettings
     public override void ExposeData()
     {
         base.ExposeData();
+        Scribe_Values.Look(ref BackwardsCompatibility, "BackwardsCompatability");
         Scribe_Values.Look(ref AddVisuals, "AddVisuals");
         Scribe_Values.Look(ref GenerateFromAll, "GenerateFromAll");
         Scribe_Values.Look(ref GenerateFloorlike, "GenerateFloorlike");

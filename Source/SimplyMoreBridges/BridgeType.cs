@@ -15,24 +15,24 @@ namespace SimplyMoreBridges
     {
         public static string DefName(this BridgeType bridge)
         {
-            switch (bridge)
+            return bridge switch
             {
-                case BridgeType.Wooden: return "WoodenBridge";
-                case BridgeType.Heavy: return "HeavyBridge";
-                case BridgeType.Deep: return "DeepBridge";
-                default: throw new ArgumentOutOfRangeException(nameof(bridge), bridge, null);
-            }
+                BridgeType.Wooden => "WoodenBridge",
+                BridgeType.Heavy => "HeavyBridge",
+                BridgeType.Deep => "DeepBridge",
+                _ => throw new ArgumentOutOfRangeException(nameof(bridge), bridge, null)
+            };
         }
 
         public static string Label(this BridgeType bridge)
         {
-            switch (bridge)
+            return bridge switch
             {
-                case BridgeType.Wooden: return "Wooden Bridge ";
-                case BridgeType.Heavy: return "Heavy Bridge ";
-                case BridgeType.Deep: return "Deep Bridge ";
-                default: throw new ArgumentOutOfRangeException(nameof(bridge), bridge, null);
-            }
+                BridgeType.Wooden => "Wooden Bridge ",
+                BridgeType.Heavy => "Heavy Bridge ",
+                BridgeType.Deep => "Deep Bridge ",
+                _ => throw new ArgumentOutOfRangeException(nameof(bridge), bridge, null)
+            };
         }
     }
 }
