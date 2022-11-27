@@ -9,6 +9,7 @@ namespace SimplyMoreBridges;
 public class GenerateBridges
 {
     public static readonly Dictionary<string, DesignatorDropdownGroupDef> DropDownDict = new();
+    public static readonly List<TerrainDef> BridgeDefList = new();
 
     public static void Prefix()
     {
@@ -114,8 +115,8 @@ public class GenerateBridges
     /// <returns></returns>
     private static bool IsWooden(TerrainDef td)
     {
-        return td.costList is {Count: > 0} &&
-               td.costList[0].thingDef is {stuffProps.categories: { }} &&
+        return td.costList is { Count: > 0 } &&
+               td.costList[0].thingDef is { stuffProps.categories: { } } &&
                td.costList[0].thingDef.stuffProps.categories.Contains(StuffCategoryDefOf.Woody);
     }
 
@@ -128,7 +129,9 @@ public class GenerateBridges
     {
         try
         {
-            DefGenerator.AddImpliedDef(GenerateBridgeDef(td, bridgeType));
+            var bridgeDef = GenerateBridgeDef(td, bridgeType);
+            BridgeDefList.Add(bridgeDef);
+            DefGenerator.AddImpliedDef(bridgeDef);
         }
         catch (Exception e)
         {
@@ -165,7 +168,7 @@ public class GenerateBridges
         bridgeDef.texturePath = baseDef.texturePath;
 
         var hitPoints = baseDef.GetStatValueAbstract(StatDefOf.MaxHitPoints) + 50f;
-        bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.MaxHitPoints, value = hitPoints});
+        bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.MaxHitPoints, value = hitPoints });
         bridgeDef.tags = baseDef.tags?.ToList();
         return bridgeDef;
     }
@@ -205,14 +208,14 @@ public class GenerateBridges
         {
             case BridgeType.Wooden:
                 bridgeDef.terrainAffordanceNeeded = TerrainAffordanceDefOf.Bridgeable;
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.WorkToBuild, value = 1000});
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.Flammability, value = 0.8f});
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.WorkToBuild, value = 1000 });
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.Flammability, value = 0.8f });
                 bridgeDef.researchPrerequisites = new List<ResearchProjectDef>();
                 break;
             case BridgeType.Heavy:
                 bridgeDef.terrainAffordanceNeeded = TerrainAffordanceDefOf.Bridgeable;
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.WorkToBuild, value = 1000 + statValue});
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.Flammability, value = 0});
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.WorkToBuild, value = 1000 + statValue });
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.Flammability, value = 0 });
                 bridgeDef.researchPrerequisites = new List<ResearchProjectDef>
                 {
                     DefDatabase<ResearchProjectDef>.GetNamedSilentFail("HeavyBridges")
@@ -220,8 +223,8 @@ public class GenerateBridges
                 break;
             case BridgeType.Deep:
                 bridgeDef.terrainAffordanceNeeded = TerrainAffordanceDefOf.BridgeableDeep;
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.WorkToBuild, value = 1500 + statValue});
-                bridgeDef.statBases.Add(new StatModifier {stat = StatDefOf.Flammability, value = 0});
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.WorkToBuild, value = 1500 + statValue });
+                bridgeDef.statBases.Add(new StatModifier { stat = StatDefOf.Flammability, value = 0 });
                 bridgeDef.researchPrerequisites = new List<ResearchProjectDef>
                 {
                     DefDatabase<ResearchProjectDef>.GetNamedSilentFail("DeepWaterBridges")
@@ -384,6 +387,6 @@ public class GenerateBridges
     {
         var recountedCost = originalCost * LoadedModManager.GetMod<SimplyMoreBridgesMod>()
             .GetSettings<SimplyMoreBridgesSettings>().CostPercent;
-        return Convert.ToInt32(Math.Floor(recountedCost));
+        return Convert.ToInt32(Math.Ceiling(recountedCost));
     }
 }

@@ -97,7 +97,7 @@ internal class SimplyMoreBridgesMod : Mod
         listing_Standard.Gap();
         var currentPercent = Math.Round(Settings.CostPercent * 100);
         listing_Standard.Label("SimplyMoreBridges.BridgeCostPercent".Translate(currentPercent));
-        Settings.CostPercent = listing_Standard.Slider(Settings.CostPercent, 0.01f, 2f);
+        Settings.CostPercent = listing_Standard.Slider(Settings.CostPercent, 0.00f, 2f);
         if (currentVersion != null)
         {
             listing_Standard.Gap();

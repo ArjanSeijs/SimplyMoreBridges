@@ -15,7 +15,7 @@ public static class Harmony_Designator_RemoveBridge_CanDesignateCell
             Log.Message($"terrainDef: {terrainDef}");
         }
 
-        if (!terrainDef.defName.StartsWith("HeavyBridge") && !terrainDef.defName.StartsWith("DeepWaterBridge"))
+        if (!terrainDef.defName.StartsWith("HeavyBridge") && !terrainDef.defName.StartsWith("DeepWaterBridge") && !terrainDef.defName.StartsWith("DeepBridge"))
         {
             return true;
         }
